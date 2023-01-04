@@ -3,9 +3,9 @@
 
 
 
-<nav class="navbar navbar-light bg-light justify-content-between">
+<nav class="navbar navbar-light bg-light justify-content-between" style="padding: 4px; margin: 1px">
     <h1 class="navbar-brand mb-0 h1"> Inventory </h1>
-    <button class="btn btn-primary" type="button" @onclick="OpenAddItem">
+    <button class="btn-sm btn-success" type="button" @onclick="OpenAddItem">
         <span class="oi oi-plus" /> Add item
     </button>
 </nav>
@@ -38,15 +38,15 @@
                     <td>@item.Price</td>
                     <td>@item.Quantity</td>
                     <td>
-                        <button class="btn btn-primary" type="button" @onclick="() => OpenDeleteItem(item)">Delete</button>
+                        <button class="btn btn-outline-danger" type="button" @onclick="() => OpenDeleteItem(item)">Delete</button>
 
                     </td>
                     <td>
-                        <button class="btn btn-primary" type="button" @onclick="() => OpenEditItem(item)">Edit</button>
+                        <button class="btn-sm btn-outline-success" type="button" @onclick="() => OpenEditItem(item)">Edit</button>
 
                     </td>
                     <td>
-                        <button class="btn btn-primary" type="button" @onclick="() => OpenOrderItem(item)">Order</button>
+                        <button class="btn-sm btn-primary" type="button" @onclick="() => OpenOrderItem(item)">Order</button>
 
                     </td>
 
@@ -114,10 +114,10 @@
 }
 @if (_showorderItemDialog)
 {
-    <ModalDialog Title="Add item" OnClose="@OnEditItemDialogClose" OkLabel="Confirm">
+    <ModalDialog Title="Add item" OnClose="@OnOrderItemDialogClose" OkLabel="Confirm">
        
         <div class="form-floating">
-            <input id="qty" type="text" class="form-control" @bind="_orderedItem.Quantity" placeholder="Item qty" />
+            <input id="qty" type="text" class="form-control" @bind="_orderItem.QuantityRequested" placeholder="Item qty" />
             <label for="qty">Item Name</label>
         </div>
 
@@ -135,6 +135,9 @@
 
     private Item _addItem { get; set; }
     private ActivityLog _orderItem { get; set; }
+    private List<ActivityLog> _orders { get; set; }
+    private Item _orderItem1 { get; set; }
+
     private Item _orderedItem { get; set; }
 
     private bool _showorderItemDialog;
@@ -172,6 +175,7 @@
     {
         _dialogTitle = "Order item";
         _dialogOkLabel = "Order";
+        _orderItem1 = item;
         _orderItem = new ActivityLog();
         //_orderItem.Id = Guid.Empty;
         _showorderItemDialog = true;
@@ -236,6 +240,30 @@
             catch (Exception e)
             {
                 _deleteErrorMessage = e.Message;
+            }
+        }
+
+
+    }
+    public void OnOrderItemDialogClose(bool isCancel)
+    {
+        if (isCancel)
+        {
+            _showorderItemDialog = false;
+        }
+        else
+        {
+            try
+            {
+                _orderErrorMessage = "";
+
+
+                _orders = ActivityLogService.Order(_orderItem1.Id, _currentUser.CurrentUser.Id, _orderItem.QuantityRequested);
+                _showorderItemDialog = false;
+            }
+            catch (Exception e)
+            {
+                _orderErrorMessage = e.Message;
             }
         }
 

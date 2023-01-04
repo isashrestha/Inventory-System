@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Text.Json;
+using System.Data;
 
 namespace Inventory_Management_System.Data;
 
@@ -39,20 +40,30 @@ public static class UsersService
         return JsonSerializer.Deserialize<List<User>>(json);
     }
 
-    public static List<User> Create(Guid staffId, string username, string password, Role role)
+    public static List<User> Create(Guid staffId, string username, string firstname, string lastname, string email, string password, Role role)
     {
         List<User> users = GetAll();
         bool usernameExists = users.Any(x => x.Username == username);
+
+        int totalAdmin = users.Where(x => x.Role == Role.Admin).Count();
+
 
         if (usernameExists)
         {
             throw new Exception("Username already exists.");
         }
 
+        if (totalAdmin >=2 && role == Role.Admin)
+        {
+            throw new Exception("Two admins already exists");
+        }
         users.Add(
             new User
             {
                 Username = username,
+                Firstname = firstname,
+                Lastname = lastname,
+                Email = email,
                 PasswordHash = Utils.HashSecret(password),
                 Role = role,
                 CreatedBy = staffId
@@ -61,6 +72,7 @@ public static class UsersService
         SaveAll(users);
         return users;
     }
+
 
     public static void SeedUsers()
     {
@@ -71,6 +83,12 @@ public static class UsersService
             Create(Guid.Empty, SeedUsername, SeedPassword, Role.Admin);
         }
     }
+
+    private static void Create(Guid empty, string seedUsername, string seedPassword, Role admin)
+    {
+        throw new NotImplementedException();
+    }
+
     public static User GetById(Guid id)
     {
         List<User> users = GetAll();
@@ -111,7 +129,8 @@ public static class UsersService
 
         return user;
     }
-    public static User ChangePassword(Guid id, string currentPassword, string newPassword)
+
+      public static User ChangePassword(Guid id, string currentPassword, string newPassword)
     {
         if (currentPassword == newPassword)
         {

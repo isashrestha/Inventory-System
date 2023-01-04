@@ -1,9 +1,9 @@
 ﻿@page "/users"
 @using Inventory_Management_System.Data;
 
-<nav class="navbar navbar-light bg-light justify-content-between">
+<nav class="navbar navbar-light bg-light justify-content-between" style="padding: 4px">
     <h1 class="navbar-brand mb-0 h1">Users</h1>
-    <button class="btn btn-primary" type="button" @onclick="OpenAddUserDialog">
+    <button class="btn-sm btn-success" type="button" @onclick="OpenAddUserDialog">
         <span class="oi oi-plus" /> Add
     </button>
 </nav>
@@ -45,8 +45,8 @@
 @if (_showAddUserDialog)
 {
     <ModalDialog Title="Add User" OnClose="@OnAddUserDialogClose" OkLabel="Add">
-    <form>
-        <div class="form-floating">
+    <form style="padding: 2px">
+        <div class="form-floating mb-1">
             <input type="text" class="form-control username" @bind="_username" placeholder="Username" />
             <label for="floatingInput">Username</label>
         </div>
@@ -93,6 +93,10 @@
     private string _deleteUserErrorMessage { get; set; }
     private User _deleteUser { get; set; }
     private string _username { get; set; }
+    private string _firstname { get; set; }
+    private string _lastname { get; set; }
+    private string _email { get; set; }
+
     private string _password { get; set; }
     private Role _role { get; set; }
 
@@ -120,7 +124,7 @@
             try
             {
                 _addUserErrorMessage = "";
-                _users = UsersService.Create(_globalState.CurrentUser.Id, _username, _password, _role);
+                _users = UsersService.Create(_globalState.CurrentUser.Id, _username, _firstname, _lastname, _email, _password, _role);
                 _showAddUserDialog = false;
             }
             catch (Exception e)

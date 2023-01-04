@@ -2,11 +2,13 @@
 @using Inventory_Management_System.Data;
 @inject NavigationManager NavManager
 
-<div class="login-body">
-    <div class="form-login">
-        <form class="text-center" @onsubmit="LoginHandler">
-            <img class="mb-4" src="../wwwroot/NewFolder/fabicon.ico" alt="" height="72">
-            <h1 class="h3 mb-3 fw-bold">Welcome to Inventory Management System</h1>
+<div class="login-body container">
+    <div class="form-login row mt-3">
+        <div class="col-3">
+        </div>
+        <form class="text-center col-6 shadow-lg rounded-6" style="padding: 9px" @onsubmit="LoginHandler">
+            <h1 class="mb-4 font-weight-bold">Login</h1>
+
             @if (_showDefaultCredentials)
             {
                 <div class="alert alert-info" role="alert">
@@ -15,22 +17,24 @@
                 </div>
             }
 
-            <div class="form-floating">
-                <input type="text" class="form-control username" style="margin:4px;" @bind="_username" placeholder="Username" />
+            <div class="form-floating mb-3">
+                <input type="text" class="form-control username input-group-sm" style="margin:4px;" @bind="_username" placeholder="Username" />
                 <label for="floatingInput">Username</label>
             </div>
             <div class="form-floating mb-3">
-                <input type="password" class="form-control password" style="margin:4px;" @bind="_password" placeholder="Password" />
+                <input type="password" class="form-control password input-group-sm" style="margin:4px;" @bind="_password" placeholder="Password" />
                 <label for="floatingPassword">Password</label>
             </div>
             @if (!string.IsNullOrEmpty(_errorMessage))
             {
                 <AlertMessage Type="danger" Message="@_errorMessage" />
             }
-            <button class="w-100 btn btn-lg btn-primary" type="submit">
+            <button class="w-100 btn btn-lg btn-outline-success" type="submit">
                 <span class="oi oi-account-login"></span> Login
             </button>
         </form>
+        <div class="col-3">
+        </div>
     </div>
 </div>
 

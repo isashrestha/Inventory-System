@@ -1,0 +1,105 @@
+﻿@page "/activitylogpage"
+@using Inventory_Management_System.Data;
+
+
+
+<nav class="navbar navbar-light bg-light justify-content-between">
+    <h1 class="navbar-brand mb-0 h1"> Activity Log </h1>
+</nav>
+<table class="table">
+    <thead>
+        <tr>
+            <th>OrderedItem</th>
+            <th>ApprovedDate</th>
+            <th>AddedBy</th>
+            <th>ApprovedBy</th>
+            <th>ApprovalStatus</th>
+            <th>QuantityRequested</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            IEnumerable<ActivityLog> orderList = _orders;
+            foreach (var order in orderList)
+            {
+                <tr>
+                    <td>@order.OrderedItem</td>
+                    <td> @order.ApprovedDate.ToString("MMM dd, yyyy h:mm tt")</td>
+                  
+                    <td>@order.ApprovalStatus</td>
+                    <td>@order.ApprovedDate</td>
+                    <td>
+                        <button class="btn btn-primary" type="button" @onclick="() => OpenApproveOrder(order)">Approve</button>
+
+                    </td>
+                    <td>
+                        <button class="btn btn-primary" type="button" @onclick="() => OpenRejectOrder(order)">Reject</button>
+
+                    </td>
+
+
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+@if (_showApproveOrderDialog)
+{
+         <ModalDialog Title="Approve order" OnClose="@OnApproveOrderDialogClose" OkLabel="Confirm">
+
+             <div>Apprive?</div>
+        @if (!string.IsNullOrEmpty(_approveByErrorMessage))
+        {
+                    <AlertMessage Type="danger" Message="@_approveByErrorMessage" />
+        }
+          </ModalDialog>
+}
+
+@code{
+    [CascadingParameter]
+    public GlobalState _currentUser { get; set; }
+    private List<ActivityLog> _orders { get; set; }
+    public ActivityLog _orderedItem { get; set; }
+    public string _approveByErrorMessage{ get; set; }
+    public bool _showApproveOrderDialog { get; set; }
+
+    protected override void OnInitialized()
+    {
+        _orders = ActivityLogService.GetAll();
+    }
+    public void OpenApproveOrder(ActivityLog order)
+    {
+        _orderedItem = order;
+        _showApproveOrderDialog = true;
+    }
+    public void OpenRejectOrder(ActivityLog order)
+    {
+
+
+
+    }
+    public void OnApproveOrderDialogClose(bool isCancel)
+    {
+        if (isCancel)
+        {
+            _showApproveOrderDialog = false;
+        }
+        else
+        {
+            try
+            {
+                _approveByErrorMessage = "";
+                _orders = ActivityLogService.ApproveOrder(_orderedItem.Id, _currentUser.CurrentUser.Id);
+                //if (_addItem.Id == Guid.Empty)
+                //{
+                //    _items = InventoryService.Create(_addItem.ItemName, _addItem.Quantity, _currentUser.CurrentUser.Id, _addItem.Price);
+                //}
+                _showApproveOrderDialog = false;
+            }
+            catch (Exception e)
+            {
+                _approveByErrorMessage = e.Message;
+            }
+        }
+    }
+}

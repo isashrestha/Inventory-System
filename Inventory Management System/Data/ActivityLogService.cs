@@ -35,19 +35,38 @@ public static class ActivityLogService
 
         return JsonSerializer.Deserialize<List<ActivityLog>>(json);
     }
-    public static List<ActivityLog> Order(Guid Id, DateTime ApprovedDate, Guid AddedBy, Guid ApprovedBy, Guid ApprovalStatus)
+    public static List<ActivityLog> Order(Guid Itemid, Guid AddedBy, int quantity)
     {
 
 
         List<ActivityLog> activitylog = GetAll();
         activitylog.Add(new ActivityLog
         {
-            ApprovedDate = ApprovedDate,
             AddedBy = AddedBy,
-            ApprovedBy = ApprovedBy,
-            ApprovalStatus = ApprovalStatus,
+            ApprovalStatus = false,
+            OrderedItem = Itemid,
+            QuantityRequested = quantity
         });
         SaveAll(activitylog);
+        return activitylog;
+    }
+    public static List<ActivityLog> ApproveOrder(Guid id,Guid approvedBy)
+    {
+
+
+        List<ActivityLog> activitylog = GetAll();
+        var items = InventoryService.GetAll();
+        var order = activitylog.FirstOrDefault(x => x.Id == id);
+        var item = items.FirstOrDefault(x => x.Id == order.OrderedItem);
+        order.ApprovedBy = approvedBy;
+        order.ApprovalStatus = true;
+        order.ApprovedDate = DateTime.Now;
+        item.Quantity = item.Quantity - order.QuantityRequested;
+
+
+       
+        SaveAll(activitylog);
+        InventoryService.SaveAll(items);
         return activitylog;
     }
 

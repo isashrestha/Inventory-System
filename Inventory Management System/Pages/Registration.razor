@@ -1,0 +1,73 @@
+﻿@page "/register"
+@using Inventory_Management_System.Data;
+@inject NavigationManager NavManager
+
+<div class="register-body container">
+    <div class="form-register row">
+        <div class="col-2"></div>
+        <form class="text-center col-8 shadow-lg m-3 p-2" @onsubmit="RegisterHandler">
+            <img class="mb-4" src="../wwwroot/NewFolder/fabicon.ico" alt="" height="72">
+            <h1 class="h3 mb-3 fw-bold">Registration</h1>
+            <div class="form-floating">
+                <input type="text" class="form-control username mb-1" style="margin:4px;" @bind="_username" placeholder="Username" />
+                <label class="oi oi-people" for="floatingInput"> User name</label>
+            </div>
+            <div class="form-floating">
+                <input type="text" class="form-control firstname" style="margin:4px;" @bind="_firstname" placeholder="Firstname" />
+                <label class="oi oi-people"  for="floatingInput"> First name</label>
+            </div>
+            <div class="form-floating mb-3">
+                <input type="text" class="form-control lastname mb-1" style="margin:4px;" @bind="_lastname" placeholder="LastName" />
+                <label class="oi oi-people" for="floatingInput"> Last name</label>
+            </div>
+            <div class="form-floating mb-3">
+                <input type="Email" class="form-control email mb-1" style="margin:4px;" @bind="_email" placeholder="Email" />
+                <label class="oi oi-people" for="floatingInput"> Email</label>
+            </div>
+            <div class="form-floating mb-3">
+                <input type="password" class="form-control password" style="margin:4px;" @bind="_password" placeholder="Password" />
+                <label class="oi oi-key"  for="floatingPassword"> Password</label>
+            </div>
+
+            @if (!string.IsNullOrEmpty(_errorMessage))
+            {
+                <AlertMessage Type="danger" Message="@_errorMessage" />
+            }
+            <button class="w-100 btn btn-lg btn-outline-success" type="submit">
+                <span class="oi oi-account-login"></span> Register
+            </button>
+        </form>
+        <div class="col-2"></div>
+    </div>
+</div>
+
+@code {
+    [CascadingParameter]
+    private GlobalState _globalState { get; set; }
+    private string _username { get; set; }
+    private string _firstname { get; set; }
+    private string _lastname { get; set; }
+    private string _email { get; set; }
+    private string _password { get; set; }
+    private List<User> _users { get; set; }
+    
+    
+
+    private string _errorMessage = "";
+
+
+    private void RegisterHandler()
+    {
+        try
+        {
+            _errorMessage = "";
+            _users = UsersService.Create( _globalState.CurrentUser.Id, _username, _firstname,_lastname,_email, _password, Role.User);
+            NavManager.NavigateTo("/users");
+        }
+        catch (Exception e)
+        {
+            _errorMessage = e.Message;
+            Console.WriteLine(e);
+        }
+    }
+}

@@ -5,7 +5,7 @@ namespace Inventory_Management_System.Data;
 
 public static class InventoryService
 {
-    private static void SaveAll(List<Item> inventory)
+    public static void SaveAll(List<Item> inventory)
     {
         string appDataDirectoryPath = Utils.GetAppDirectoryPath();
         string InventoryFilePath = Utils.GetAppInventoryFilePath();
