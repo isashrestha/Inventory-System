@@ -1,0 +1,267 @@
+﻿@page "/inventory"
+@using Inventory_Management_System.Data;
+
+
+
+<nav class="navbar navbar-light bg-light justify-content-between">
+    <h1 class="navbar-brand mb-0 h1"> Inventory </h1>
+    <button class="btn btn-primary" type="button" @onclick="OpenAddItem">
+        <span class="oi oi-plus" /> Add item
+    </button>
+</nav>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>AddedDate</th>
+            <th>AddedBy</th>
+            <th>Price</th>
+            <th>Quantity</th>
+
+
+        </tr>
+    </thead>
+    <tbody>
+             @{
+            IEnumerable<Item> itemList = _items;
+            foreach (var item in itemList)
+            {
+                <tr>
+                    <td>@item.ItemName</td>
+                    <td> @item.AddedDate.ToString("MMM dd, yyyy h:mm tt")</td>
+                    <td>
+                        @{
+                            var addedBy = UsersService.GetById(item.AddedBy);
+                            <span>@( addedBy == null ? "Unknown" : addedBy.Username )</span>
+                        }
+                     </td>
+                    <td>@item.Price</td>
+                    <td>@item.Quantity</td>
+                    <td>
+                        <button class="btn btn-primary" type="button" @onclick="() => OpenDeleteItem(item)">Delete</button>
+
+                    </td>
+                    <td>
+                        <button class="btn btn-primary" type="button" @onclick="() => OpenEditItem(item)">Edit</button>
+
+                    </td>
+                    <td>
+                        <button class="btn btn-primary" type="button" @onclick="() => OpenOrderItem(item)">Order</button>
+
+                    </td>
+
+
+                 </tr>
+            }
+            }
+    </tbody>
+</table>
+@if (_showAddItemDialog)
+{
+     <ModalDialog Title="Add item" OnClose="@OnAddItemDialogClose" OkLabel="Confirm">
+       <div class="form-floating">
+        <input id="itemName" type="text" class="form-control" @bind="_addItem.ItemName" placeholder="Item Name" />
+        <label for="itemName">Item Name</label>
+    </div>
+        <div class="form-floating">
+            <input id="price" type="text" class="form-control" @bind="_addItem.Price" placeholder="Item price" />
+            <label for="price">Item price</label>
+        </div>
+        <div class="form-floating">
+            <input id="qty" type="text" class="form-control" @bind="_addItem.Quantity" placeholder="Item qty" />
+            <label for="qty">Item Name</label>
+        </div>
+
+        @if (!string.IsNullOrEmpty(_addErrorMessage))
+        {
+            <AlertMessage Type="danger" Message="@_addErrorMessage" />
+        }
+      </ModalDialog>
+}
+
+@if (_showDeleteItemDialog)
+{
+    <ModalDialog Title="Add item" OnClose="@OnDeleteItemDialogClose" OkLabel="Confirm">
+            <p> Are you sure you want to delete this item?</p>
+              @if (!string.IsNullOrEmpty(_deleteErrorMessage))
+        {
+            <AlertMessage Type="danger" Message="@_addErrorMessage" />
+        }
+    </ModalDialog>
+}
+
+@if (_showEditItemDialog)
+{
+     <ModalDialog Title="Add item" OnClose="@OnEditItemDialogClose" OkLabel="Confirm">
+       <div class="form-floating">
+        <input id="itemName" type="text" class="form-control" @bind="_editItem.ItemName" placeholder="Item Name" />
+        <label for="itemName">Item Name</label>
+    </div>
+        <div class="form-floating">
+            <input id="price" type="text" class="form-control" @bind="_editItem.Price" placeholder="Item price" />
+            <label for="price">Item price</label>
+        </div>
+        <div class="form-floating">
+            <input id="qty" type="text" class="form-control" @bind="_editItem.Quantity" placeholder="Item qty" />
+            <label for="qty">Item Name</label>
+        </div>
+
+        @if (!string.IsNullOrEmpty(_editErrorMessage))
+        {
+            <AlertMessage Type="danger" Message="@_editErrorMessage" />
+        }
+      </ModalDialog>
+}
+@if (_showorderItemDialog)
+{
+    <ModalDialog Title="Add item" OnClose="@OnEditItemDialogClose" OkLabel="Confirm">
+       
+        <div class="form-floating">
+            <input id="qty" type="text" class="form-control" @bind="_orderedItem.Quantity" placeholder="Item qty" />
+            <label for="qty">Item Name</label>
+        </div>
+
+        @if (!string.IsNullOrEmpty(_orderErrorMessage))
+        {
+            <AlertMessage Type="danger" Message="@_orderErrorMessage" />
+        }
+    </ModalDialog>
+}
+
+@code{
+    [CascadingParameter]
+    public GlobalState _currentUser { get; set; }
+    public List<Item> _items;
+
+    private Item _addItem { get; set; }
+    private ActivityLog _orderItem { get; set; }
+    private Item _orderedItem { get; set; }
+
+    private bool _showorderItemDialog;
+    private string _orderErrorMessage;
+
+    private bool _showAddItemDialog;
+    private string _addErrorMessage;
+
+    private Item _editItem { get; set; }
+    private bool _showEditItemDialog;
+    private string _editErrorMessage;
+
+    private Item _deleteItem { get; set; }
+    private bool _showDeleteItemDialog;
+    private string _deleteErrorMessage;
+
+
+    private string _dialogTitle { get; set; }
+    private string _dialogOkLabel { get; set; }
+    protected override void OnInitialized()
+    {
+        _items = InventoryService.GetAll();
+    }
+
+    public void OpenAddItem()
+    {
+        _dialogTitle = "Add item";
+        _dialogOkLabel = "Add";
+        _addItem = new Item();
+        _addItem.Id = Guid.Empty;
+        _showAddItemDialog = true;
+    }
+
+    public void OpenOrderItem(Item item)
+    {
+        _dialogTitle = "Order item";
+        _dialogOkLabel = "Order";
+        _orderItem = new ActivityLog();
+        //_orderItem.Id = Guid.Empty;
+        _showorderItemDialog = true;
+    }
+
+    public void OpenDeleteItem(Item item)
+    {
+        _dialogTitle = "Delete item";
+        _dialogOkLabel = "Delete";
+        _deleteItem = item;
+        _showDeleteItemDialog = true;
+    }
+
+    public void OpenEditItem(Item item)
+    {
+        _dialogTitle = "Edit item";
+        _dialogOkLabel = "Edit";
+        _editItem = item;
+        _showEditItemDialog = true;
+    }
+
+    public void OnAddItemDialogClose(bool isCancel)
+    {
+        if (isCancel)
+        {
+            _showAddItemDialog = false;
+        }
+        else
+        {
+            try
+            {
+                _addErrorMessage = "";
+                if (_addItem.Id == Guid.Empty)
+                {
+                    _items = InventoryService.Create(_addItem.ItemName, _addItem.Quantity,_currentUser.CurrentUser.Id ,_addItem.Price);
+                }
+                _showAddItemDialog = false;
+            }
+            catch (Exception e)
+            {
+                _addErrorMessage = e.Message;
+            }
+        }
+    }
+
+    public void OnDeleteItemDialogClose(bool isCancel)
+    {
+        if (isCancel)
+        {
+            _showAddItemDialog = false;
+        }
+        else
+        {
+            try
+            {
+                _deleteErrorMessage = "";
+
+                _items = InventoryService.Delete(_currentUser.CurrentUser.Id, _deleteItem.Id);
+
+                _showDeleteItemDialog = false;
+            }
+            catch (Exception e)
+            {
+                _deleteErrorMessage = e.Message;
+            }
+        }
+
+
+    }
+    public void OnEditItemDialogClose(bool isCancel)
+    {
+        if (isCancel)
+        {
+            _showEditItemDialog = false;
+        }
+        else
+        {
+            try
+            {
+                _editErrorMessage = "";
+
+                _items = InventoryService.Update(_currentUser.CurrentUser.Id,_editItem.Id,_editItem.ItemName,_editItem.Quantity,_editItem.Price); ;
+
+                _showEditItemDialog = false;
+            }
+            catch (Exception e)
+            {
+                _editErrorMessage = e.Message;
+            }
+        }
+
+}
+}
